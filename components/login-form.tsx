@@ -15,6 +15,37 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { UserCheck, Stethoscope, HeartHandshake, Loader2 } from "lucide-react";
+
+const DEMO_ACCOUNTS = [
+  {
+    role: "kader",
+    title: "Kader Posyandu",
+    desc: "Hak akses: Input pengukuran, hitung Z-score, kelola balita",
+    email: "kader@gizisync.id",
+    password: "password123",
+    icon: UserCheck,
+    color: "bg-emerald-600 hover:bg-emerald-700 text-white",
+  },
+  {
+    role: "nutritionist",
+    title: "Ahli Gizi Puskesmas",
+    desc: "Hak akses: Analitik stunting wilayah & intervensi resep",
+    email: "gizi@gizisync.id",
+    password: "password123",
+    icon: Stethoscope,
+    color: "bg-blue-600 hover:bg-blue-700 text-white",
+  },
+  {
+    role: "parent",
+    title: "Orang Tua Balita",
+    desc: "Hak akses: Pantau grafik pertumbuhan & rekomendasi resep",
+    email: "ortu@gizisync.id",
+    password: "password123",
+    icon: HeartHandshake,
+    color: "bg-amber-600 hover:bg-amber-700 text-white",
+  },
+];
 
 export function LoginForm({
   className,
@@ -24,85 +55,211 @@ export function LoginForm({
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [activeDemo, setActiveDemo] = useState<string | null>(null);
   const router = useRouter();
 
-  const handleLogin = async (e: React.SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleLogin = async (
+    e?: React.FormEvent,
+    customEmail?: string,
+    customPassword?: string,
+    demoAccount?: (typeof DEMO_ACCOUNTS)[0],
+  ) => {
+    if (e) e.preventDefault();
+    const targetEmail = customEmail || email;
+    const targetPassword = customPassword || password;
+
+    if (!targetEmail || !targetPassword) {
+      setError("Email dan password wajib diisi");
+      return;
+    }
+
     const supabase = createClient();
     setIsLoading(true);
     setError(null);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: targetEmail,
+        password: targetPassword,
       });
-      if (error) throw error;
-      // Update this route to redirect to an authenticated route. The user already has an active session.
-      router.push("/protected");
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred");
+
+      if (signInError) {
+        // Jika akun demo belum ada di auth.users Supabase, buatkan akun secara otomatis
+        if (
+          demoAccount &&
+          (signInError.message.toLowerCase().includes("invalid") ||
+            signInError.message.toLowerCase().includes("not found"))
+        ) {
+          const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+            email: targetEmail,
+            password: targetPassword,
+            options: {
+              data: {
+                full_name: demoAccount.title,
+                role: demoAccount.role,
+              },
+            },
+          });
+
+          if (!signUpError && signUpData.user) {
+            router.push("/z-score");
+            router.refresh();
+            return;
+          }
+        }
+        throw signInError;
+      }
+
+      router.push("/z-score");
+      router.refresh();
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Gagal masuk ke akun");
     } finally {
       setIsLoading(false);
+      setActiveDemo(null);
     }
   };
 
+  const handleDemoLogin = (account: (typeof DEMO_ACCOUNTS)[0]) => {
+    setEmail(account.email);
+    setPassword(account.password);
+    setActiveDemo(account.role);
+    handleLogin(undefined, account.email, account.password, account);
+  };
+
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
-          <CardDescription>
-            Enter your email below to login to your account
+    <div className={cn("flex flex-col gap-6 max-w-md w-full mx-auto", className)} {...props}>
+      <Card className="border shadow-lg">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold tracking-tight text-center">
+            Masuk ke GiziSync
+          </CardTitle>
+          <CardDescription className="text-center text-sm">
+            Sistem Pemantauan Stunting & Rekomendasi Gizi Presisi
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleLogin}>
-            <div className="flex flex-col gap-6">
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
-                  <Link
-                    href="/auth/forgot-password"
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+        <CardContent className="space-y-6">
+          {/* Section: One-Click Demo Login untuk Juri */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Evaluasi Cepat Dewan Juri (1-Click Demo)
+              </span>
+            </div>
+            <div className="grid gap-2">
+              {DEMO_ACCOUNTS.map((acc) => {
+                const Icon = acc.icon;
+                const isSelected = activeDemo === acc.role;
+                return (
+                  <button
+                    key={acc.role}
+                    type="button"
+                    onClick={() => handleDemoLogin(acc)}
+                    disabled={isLoading}
+                    className={cn(
+                      "flex items-start gap-3 p-3 text-left rounded-lg border transition-all text-sm",
+                      "hover:bg-accent hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary",
+                      isSelected && "ring-2 ring-primary bg-accent",
+                    )}
                   >
-                    Forgot your password?
-                  </Link>
-                </div>
-                <Input
-                  id="password"
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
+                    <div className={cn("p-2 rounded-md shrink-0", acc.color)}>
+                      {isSelected && isLoading ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Icon className="w-4 h-4" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold text-foreground flex items-center justify-between">
+                        <span>{acc.title}</span>
+                        <span className="text-xs font-mono text-muted-foreground">{acc.email}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
+                        {acc.desc}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">Atau masuk manual</span>
+            </div>
+          </div>
+
+          {/* Form Login Manual */}
+          <form onSubmit={(e) => handleLogin(e)} className="space-y-4" autoComplete="on">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                placeholder="nama@contoh.id"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                suppressHydrationWarning
+              />
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">Password</Label>
+                <Link
+                  href="/auth/forgot-password"
+                  className="text-xs text-muted-foreground hover:underline"
+                >
+                  Lupa password?
+                </Link>
               </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Logging in..." : "Login"}
-              </Button>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                suppressHydrationWarning
+              />
             </div>
-            <div className="mt-4 text-center text-sm">
-              Don&apos;t have an account?{" "}
-              <Link
-                href="/auth/sign-up"
-                className="underline underline-offset-4"
-              >
-                Sign up
-              </Link>
-            </div>
+
+            {error && (
+              <div className="p-3 text-xs text-destructive bg-destructive/10 rounded-md border border-destructive/20">
+                {error}
+              </div>
+            )}
+
+            <Button
+              type="submit"
+              className="w-full font-medium"
+              disabled={isLoading}
+              suppressHydrationWarning
+            >
+              {isLoading && !activeDemo ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Sedang Masuk...
+                </>
+              ) : (
+                "Masuk ke Akun"
+              )}
+            </Button>
           </form>
+
+          <div className="text-center text-xs text-muted-foreground">
+            Belum punya akun?{" "}
+            <Link href="/auth/sign-up" className="underline underline-offset-4 hover:text-foreground">
+              Daftar akun baru
+            </Link>
+          </div>
         </CardContent>
       </Card>
     </div>

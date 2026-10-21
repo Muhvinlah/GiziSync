@@ -13,9 +13,10 @@
 # testing
 /coverage
 
-# next.js
+# next.js & turbopack
 /.next/
 /out/
+/.turbo/
 
 # production
 /build
@@ -25,6 +26,12 @@
 *.pem
 .agents
 .qwen
+/.md/
+
+# data scripts cache (abaikan binary cache xlsx, simpan script .py)
+scripts/.who_cache/
+__pycache__/
+*.py[cod]
 
 # debug
 npm-debug.log*
@@ -32,12 +39,14 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files (kredensial diabaikan, template .env.example tetap di-track)
 .env*.local
 .env
+!.env.example
 
-# vercel
+# vercel & supabase local
 .vercel
+.supabase/
 
 # typescript
 *.tsbuildinfo
