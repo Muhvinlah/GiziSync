@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { childSchema, ChildFormData } from "@/lib/validators";
 import { createChild, ChildWithLatestMeasurement } from "@/actions/children";
 import { StatusBadge } from "@/components/z-score/StatusBadge";
-import { classifyHfa, classifyWfa, classifyWfh } from "@/lib/zscore";
+import { classifyHfa, classifyWfa } from "@/lib/zscore";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

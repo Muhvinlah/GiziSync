@@ -18,6 +18,23 @@ interface GrowthChartProps {
 
 type IndicatorType = "hfa" | "wfa" | "wfh";
 
+interface LmsCurveEntry {
+  sd3neg?: number;
+  sd2neg?: number;
+  sd0?: number;
+  sd2?: number;
+  sd3?: number;
+}
+
+interface ChartPoint {
+  x: number;
+  sd3neg?: number;
+  sd2neg?: number;
+  sd0?: number;
+  sd2?: number;
+  sd3?: number;
+}
+
 function GrowthChartInner({
   gender,
   ageMonths,
@@ -29,8 +46,8 @@ function GrowthChartInner({
 
   // Siapkan data kurva berdasarkan indikator yang dipilih
   const chartData = useMemo(() => {
-    const lmsDb = whoLms as any;
-    const points: any[] = [];
+    const lmsDb = whoLms as unknown as Record<string, Record<Gender, Record<string, LmsCurveEntry>>>;
+    const points: ChartPoint[] = [];
 
     if (indicator === "hfa") {
       const hfaData = lmsDb.hfa?.[gender] || {};

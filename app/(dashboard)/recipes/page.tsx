@@ -24,7 +24,6 @@ async function RecipesContent({
 
   let condition: DeficitCondition | undefined = undefined;
   let childName = "";
-  let latestMeasurement: any = null;
 
   if (childId) {
     const { data: child } = await getChildById(childId);
@@ -32,12 +31,12 @@ async function RecipesContent({
       childName = child.name;
       const measurements = child.measurements || [];
       if (measurements.length > 0) {
-        latestMeasurement = measurements[measurements.length - 1];
+        const latest = measurements[measurements.length - 1];
         condition = {
           child_name: child.name,
-          is_stunted: (latestMeasurement.zscore_hfa ?? 0) < -2,
-          is_underweight: (latestMeasurement.zscore_wfa ?? 0) < -2,
-          is_wasted: (latestMeasurement.zscore_wfh ?? 0) < -2,
+          is_stunted: (latest.zscore_hfa ?? 0) < -2,
+          is_underweight: (latest.zscore_wfa ?? 0) < -2,
+          is_wasted: (latest.zscore_wfh ?? 0) < -2,
         };
       }
     }

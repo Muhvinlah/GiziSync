@@ -12,7 +12,6 @@ import {
   RefreshCw,
   SlidersHorizontal,
   CheckCircle2,
-  AlertCircle,
 } from "lucide-react";
 
 export function OfflineBanner() {

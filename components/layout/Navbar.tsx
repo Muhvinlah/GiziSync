@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { LogoutButton } from "@/components/logout-button";
-import { Activity, Menu, X, HeartPulse } from "lucide-react";
+import { Menu, X, HeartPulse } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
