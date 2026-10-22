@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { connection } from "next/server";
 import { getChildById } from "@/actions/children";
 import { generateSmartRecipes, DeficitCondition } from "@/lib/recipe-engine";
 import { RecipeCard } from "@/components/recipes/RecipeCard";
@@ -17,6 +18,7 @@ async function RecipesContent({
 }: {
   searchParams: Promise<{ child_id?: string; category?: string }>;
 }) {
+  await connection();
   const resolvedParams = await searchParams;
   const childId = resolvedParams.child_id;
 

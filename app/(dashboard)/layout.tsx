@@ -1,10 +1,14 @@
 import { Suspense } from "react";
+import { connection } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { Navbar } from "@/components/layout/Navbar";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { OfflineBanner } from "@/components/layout/OfflineBanner";
 
 async function NavbarWrapper() {
+  // Sinyal resmi Next.js bahwa komponen ini membaca data dinamis (auth/cookies/waktu) saat request
+  await connection();
+
   const supabase = await createClient();
   const {
     data: { user },

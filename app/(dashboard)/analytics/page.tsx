@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { connection } from "next/server";
 import { getChildren } from "@/actions/children";
 import { RegionChart, RegionAggregate } from "@/components/analytics/RegionChart";
 import { BarChart3, Building2 } from "lucide-react";
@@ -9,6 +10,7 @@ export const metadata = {
 };
 
 async function AnalyticsContent() {
+  await connection();
   const { data: childrenData } = await getChildren();
 
   // Agregasi kasus per wilayah

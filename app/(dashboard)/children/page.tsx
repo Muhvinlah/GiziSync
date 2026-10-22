@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { connection } from "next/server";
 import { getChildren } from "@/actions/children";
 import { ChildrenClientView } from "@/components/children/ChildrenClientView";
 import { Baby } from "lucide-react";
@@ -15,7 +16,7 @@ const DEFAULT_CHILDREN_DEMO = [
     birth_date: "2024-10-01",
     gender: "male" as const,
     region: "Desa Sukamaju",
-    created_at: new Date().toISOString(),
+    created_at: "2026-10-21T00:00:00.000Z",
     measurements: [
       {
         id: "m-1",
@@ -35,7 +36,7 @@ const DEFAULT_CHILDREN_DEMO = [
     birth_date: "2024-06-15",
     gender: "female" as const,
     region: "Desa Karanganyar",
-    created_at: new Date().toISOString(),
+    created_at: "2026-10-21T00:00:00.000Z",
     measurements: [
       {
         id: "m-2",
@@ -55,7 +56,7 @@ const DEFAULT_CHILDREN_DEMO = [
     birth_date: "2023-12-10",
     gender: "male" as const,
     region: "Kelurahan Cibiru",
-    created_at: new Date().toISOString(),
+    created_at: "2026-10-21T00:00:00.000Z",
     measurements: [
       {
         id: "m-3",
@@ -75,7 +76,7 @@ const DEFAULT_CHILDREN_DEMO = [
     birth_date: "2024-02-20",
     gender: "female" as const,
     region: "Desa Mekarjaya",
-    created_at: new Date().toISOString(),
+    created_at: "2026-10-21T00:00:00.000Z",
     measurements: [
       {
         id: "m-4",
@@ -92,6 +93,7 @@ const DEFAULT_CHILDREN_DEMO = [
 ];
 
 async function ChildrenContent() {
+  await connection();
   const { data: dbChildren } = await getChildren();
 
   const finalChildren =

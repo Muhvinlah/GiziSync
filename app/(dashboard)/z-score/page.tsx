@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { connection } from "next/server";
 import { getChildren } from "@/actions/children";
 import { ZScoreForm } from "@/components/z-score/ZScoreForm";
 import { Sparkles, Info } from "lucide-react";
@@ -9,6 +10,7 @@ export const metadata = {
 };
 
 async function ZScoreContent() {
+  await connection();
   const { data: childrenData } = await getChildren();
 
   // Siapkan daftar anak dengan fallback demo data jika DB masih kosong
