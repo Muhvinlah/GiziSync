@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Calculator, UtensilsCrossed, Baby, BarChart3, WifiOff } from "lucide-react";
+import { Calculator, UtensilsCrossed, Baby, BarChart3, WifiOff, Users } from "lucide-react";
 
 const SIDEBAR_NAV = [
   {
@@ -31,7 +31,7 @@ const SIDEBAR_NAV = [
   },
 ];
 
-export function Sidebar() {
+export function Sidebar({ userRole }: { userRole?: string }) {
   const pathname = usePathname();
 
   return (
@@ -66,6 +66,33 @@ export function Sidebar() {
           })}
         </nav>
       </div>
+
+      {/* Bagian Khusus Administrator */}
+      {userRole === "admin" && (
+        <div className="space-y-1 pt-2 border-t">
+          <span className="text-[11px] font-semibold text-rose-600 dark:text-rose-400 uppercase tracking-wider px-3">
+            Panel Administrator
+          </span>
+          <nav className="space-y-1 pt-1">
+            <Link
+              href="/admin/users"
+              className={`flex items-start gap-3 p-2.5 rounded-lg text-xs font-medium transition-all ${
+                pathname === "/admin/users"
+                  ? "bg-rose-600 text-white shadow-sm"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              }`}
+            >
+              <Users className="w-4 h-4 shrink-0 mt-0.5" />
+              <div className="min-w-0">
+                <div className="font-semibold">Kelola Akun Petugas</div>
+                <div className={`text-[10px] line-clamp-1 ${pathname === "/admin/users" ? "text-white/80" : "text-muted-foreground"}`}>
+                  Tambah Kader &amp; Ahli Gizi
+                </div>
+              </div>
+            </Link>
+          </nav>
+        </div>
+      )}
 
       {/* Info Ketahanan Mode Offline */}
       <div className="mt-auto p-3 rounded-lg border bg-muted/40 text-xs space-y-1.5">

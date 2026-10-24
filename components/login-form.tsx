@@ -15,9 +15,18 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { UserCheck, Stethoscope, HeartHandshake, Loader2 } from "lucide-react";
+import { UserCheck, Stethoscope, HeartHandshake, Loader2, ShieldCheck } from "lucide-react";
 
 const DEMO_ACCOUNTS = [
+  {
+    role: "admin",
+    title: "Administrator",
+    desc: "Hak akses: Kelola akun & registrasi Kader dan Ahli Gizi",
+    email: "admin@gizisync.id",
+    password: "password123",
+    icon: ShieldCheck,
+    color: "bg-rose-600 hover:bg-rose-700 text-white",
+  },
   {
     role: "kader",
     title: "Kader Posyandu",
@@ -78,7 +87,7 @@ export function LoginForm({
     setError(null);
 
     try {
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
         email: targetEmail,
         password: targetPassword,
       });
@@ -102,7 +111,8 @@ export function LoginForm({
           });
 
           if (!signUpError && signUpData.user) {
-            router.push("/z-score");
+            const destination = demoAccount.role === "admin" ? "/admin/users" : "/z-score";
+            router.push(destination);
             router.refresh();
             return;
           }
@@ -110,7 +120,19 @@ export function LoginForm({
         throw signInError;
       }
 
-      router.push("/z-score");
+      // Tentukan rute tujuan berdasarkan role
+      let userRole = demoAccount?.role;
+      if (!userRole && signInData?.user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", signInData.user.id)
+          .maybeSingle();
+        userRole = profile?.role || (signInData.user.user_metadata?.role as string);
+      }
+
+      const destination = userRole === "admin" ? "/admin/users" : "/z-score";
+      router.push(destination);
       router.refresh();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Gagal masuk ke akun");

@@ -45,6 +45,17 @@ export const loginSchema = z.object({
 
 export type LoginFormData = z.infer<typeof loginSchema>;
 
+export type UserRole = "admin" | "nutritionist" | "kader" | "parent";
+
+export const staffUserSchema = z.object({
+  fullName: z.string().min(2, "Nama lengkap minimal 2 karakter"),
+  email: z.string().email("Format email tidak valid"),
+  password: z.string().min(6, "Password minimal 6 karakter"),
+  role: z.enum(["kader", "nutritionist"]),
+});
+
+export type StaffUserFormData = z.infer<typeof staffUserSchema>;
+
 export interface OfflineQueueItem extends MeasurementFormData {
   local_id: string;
   queued_at: string;
@@ -59,3 +70,4 @@ export interface OfflineQueueItem extends MeasurementFormData {
     needs_intervention: boolean;
   };
 }
+

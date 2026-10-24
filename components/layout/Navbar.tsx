@@ -8,7 +8,7 @@ import { Menu, X, HeartPulse } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
-const NAV_ITEMS = [
+const BASE_NAV_ITEMS = [
   { href: "/z-score", label: "Kalkulator Z-Score" },
   { href: "/recipes", label: "Resep Gizi Cerdas" },
   { href: "/children", label: "Data Balita" },
@@ -19,8 +19,15 @@ export function Navbar({ userRole, userEmail }: { userRole?: string; userEmail?:
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const navItems = [
+    ...BASE_NAV_ITEMS,
+    ...(userRole === "admin" ? [{ href: "/admin/users", label: "Kelola Petugas" }] : []),
+  ];
+
   const getRoleBadge = (role?: string) => {
     switch (role) {
+      case "admin":
+        return <span className="text-[11px] font-semibold bg-rose-500/15 text-rose-700 dark:text-rose-300 px-2 py-0.5 rounded-full border border-rose-500/30">Administrator</span>;
       case "kader":
         return <span className="text-[11px] font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/30">Kader Posyandu</span>;
       case "nutritionist":
@@ -46,7 +53,7 @@ export function Navbar({ userRole, userEmail }: { userRole?: string; userEmail?:
 
           {/* Nav Links Desktop */}
           <nav className="hidden md:flex items-center gap-1 text-xs font-medium">
-            {NAV_ITEMS.map((item) => {
+            {navItems.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Link
@@ -95,7 +102,7 @@ export function Navbar({ userRole, userEmail }: { userRole?: string; userEmail?:
       {mobileOpen && (
         <div className="md:hidden border-t p-4 space-y-3 bg-background">
           <nav className="flex flex-col gap-1 text-sm font-medium">
-            {NAV_ITEMS.map((item) => (
+            {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}

@@ -27,9 +27,10 @@ import {
 
 interface ChildrenClientViewProps {
   initialChildren: ChildWithLatestMeasurement[];
+  canManage?: boolean;
 }
 
-export function ChildrenClientView({ initialChildren }: ChildrenClientViewProps) {
+export function ChildrenClientView({ initialChildren, canManage = true }: ChildrenClientViewProps) {
   const [childrenList, setChildrenList] = useState<ChildWithLatestMeasurement[]>(initialChildren);
   const [showAddForm, setShowAddForm] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
@@ -79,23 +80,25 @@ export function ChildrenClientView({ initialChildren }: ChildrenClientViewProps)
           Menampilkan <span className="font-semibold text-foreground">{childrenList.length}</span> balita terdaftar
         </span>
 
-        <Button
-          size="sm"
-          className="h-8 text-xs gap-1.5"
-          onClick={() => setShowAddForm(!showAddForm)}
-        >
-          {showAddForm ? (
-            <>
-              <X className="w-3.5 h-3.5" />
-              Batal
-            </>
-          ) : (
-            <>
-              <UserPlus className="w-3.5 h-3.5" />
-              Daftarkan Balita Baru
-            </>
-          )}
-        </Button>
+        {canManage && (
+          <Button
+            size="sm"
+            className="h-8 text-xs gap-1.5"
+            onClick={() => setShowAddForm(!showAddForm)}
+          >
+            {showAddForm ? (
+              <>
+                <X className="w-3.5 h-3.5" />
+                Batal
+              </>
+            ) : (
+              <>
+                <UserPlus className="w-3.5 h-3.5" />
+                Daftarkan Balita Baru
+              </>
+            )}
+          </Button>
+        )}
       </div>
 
       {/* Formulir Pendaftaran Balita Baru */}

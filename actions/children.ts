@@ -84,10 +84,10 @@ export async function createChild(data: ChildFormData) {
       .eq("id", user.id)
       .maybeSingle();
 
-    if (profile?.role && !["kader", "nutritionist"].includes(profile.role)) {
+    if (profile?.role && !["kader", "nutritionist", "admin"].includes(profile.role)) {
       return {
         success: false,
-        error: "Hanya Kader Posyandu dan Ahli Gizi yang diizinkan mendaftarkan anak.",
+        error: "Hanya Kader Posyandu, Ahli Gizi, atau Administrator yang diizinkan mendaftarkan balita.",
       };
     }
 

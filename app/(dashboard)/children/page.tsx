@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { connection } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 import { getChildren } from "@/actions/children";
 import { ChildrenClientView } from "@/components/children/ChildrenClientView";
 import { Baby } from "lucide-react";
@@ -94,12 +95,30 @@ const DEFAULT_CHILDREN_DEMO = [
 
 async function ChildrenContent() {
   await connection();
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let userRole: string | undefined = undefined;
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
+    userRole = profile?.role || (user.user_metadata?.role as string);
+  }
+
   const { data: dbChildren } = await getChildren();
 
   const finalChildren =
     dbChildren && dbChildren.length > 0 ? dbChildren : DEFAULT_CHILDREN_DEMO;
 
-  return <ChildrenClientView initialChildren={finalChildren} />;
+  // Hanya kader, nutritionist, dan admin yang dapat menambah balita
+  const canManage = !userRole || ["kader", "nutritionist", "admin"].includes(userRole);
+
+  return <ChildrenClientView initialChildren={finalChildren} canManage={canManage} />;
 }
 
 export default function ChildrenPage() {

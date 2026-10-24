@@ -35,7 +35,7 @@ export async function createMeasurement(
       };
     }
 
-    // Role check: hanya kader dan nutritionist yang berhak menulis data
+    // Role check: kader, nutritionist, dan admin yang berhak menulis data pengukuran
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select("role")
@@ -47,10 +47,10 @@ export async function createMeasurement(
     }
 
     const userRole = profile?.role;
-    if (userRole && !["kader", "nutritionist"].includes(userRole)) {
+    if (userRole && !["kader", "nutritionist", "admin"].includes(userRole)) {
       return {
         success: false,
-        error: "Akses ditolak: Hanya Kader Posyandu dan Ahli Gizi yang diizinkan mencatat pengukuran.",
+        error: "Akses ditolak: Hanya Kader Posyandu, Ahli Gizi, atau Administrator yang diizinkan mencatat pengukuran.",
       };
     }
 
